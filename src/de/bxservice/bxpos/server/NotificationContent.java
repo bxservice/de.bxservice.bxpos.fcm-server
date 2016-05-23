@@ -40,13 +40,13 @@ public class NotificationContent implements Serializable {
     private Map<String,String> data;
     private Map<String,String> notification;
 
-    public void addRegId(String regId){
+    public void addRegId(String regId) {
         if(registration_ids == null)
             registration_ids = new LinkedList<String>();
         registration_ids.add(regId);
     }
 
-    public void createData(String title, String message){
+    public void createData(String title, String message) {
         if(data == null)
             data = new HashMap<String,String>();
 
@@ -55,7 +55,7 @@ public class NotificationContent implements Serializable {
         data.put("message2", message);
     }
     
-    public void createNotification(String body, String title){
+    public void createNotification(String body, String title) {
         if(notification == null)
         	notification = new HashMap<String,String>();
 

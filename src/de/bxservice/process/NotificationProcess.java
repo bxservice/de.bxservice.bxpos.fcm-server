@@ -24,14 +24,20 @@
 **********************************************************************/
 package de.bxservice.process;
 
+import java.util.List;
+
 import org.compiere.process.SvrProcess;
+import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 import de.bxservice.bxpos.server.NotificationContent;
 import de.bxservice.bxpos.server.POST2GCM;
 
 public class NotificationProcess extends SvrProcess {
 	
-	public NotificationContent content;
+	private static final String API_KEY = "AIzaSyC2Vwvpq2cQl4_nsUO2xbHpmUIm2Uv2GiY";
+	private NotificationContent content;
+	private List<List<Object>> deviceTokens;
 
 	@Override
 	protected void prepare() {
@@ -41,24 +47,46 @@ public class NotificationProcess extends SvrProcess {
 	@Override
 	protected String doIt() throws Exception {
 		
+		String message = null;
+		
 		System.out.println( "Sending POST to GCM" );
-
-        String apiKey = "AIzaSyC2Vwvpq2cQl4_nsUO2xbHpmUIm2Uv2GiY";
-        content = createContent();
-
-        POST2GCM.post(apiKey, content);
+        
+        StringBuilder selectQuery = new StringBuilder("Select bxs_devicetoken FROM BXS_DeviceRegistration")
+		.append(" WHERE ")
+		.append("IsActive='Y' AND AD_Client_ID=? AND AD_Org_ID=?");
+        
+        //Bring the devices that are registered
+        deviceTokens = DB.getSQLArrayObjectsEx(get_TrxName(), selectQuery.toString(), Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx()));
+        
+        if(deviceTokens != null && deviceTokens.size() > 0) {
+            content = createContent();
+            POST2GCM.post(API_KEY, content);
+        }
+        else {
+        	message = "No devices found";
+        }
 		
-		
-		
-        return null;
+        return message;
 	}
 	
-	public static NotificationContent createContent() {
+	public NotificationContent getContent() {
+		return content;
+	}
 
+	public void setContent(NotificationContent content) {
+		this.content = content;
+	}
+
+	public NotificationContent createContent() {
 		NotificationContent c = new NotificationContent();
 
-        c.addRegId("evNEIEiPy1I:APA91bHA6yIE3MB5srAoSX_A0dZaNxmnRyvP_O5nVrqC5dsKwBbZ-SGtamkMdy2Qp2VNravfokIP8lGLY3JiTzA9JGB-nmneV2sY0lQYmVsVO0uJWRLdk5cCSdD4BKc5Cuj_kvQ0YWuL");//Bx phone
-        c.addRegId("e-PbprbswBg:APA91bEzGmu1qkO9_gUWITmnEbqSBfCaJzyJKwmWUYQvmxEb-EiGSHHv7Q1mL2h9tsaEyXVvC0mHMrAJbLlUbIZOueDOKWfoEMxOb_xP6utwUWwCa5pigvc02lQCChzhY2GngN1KwGve");// Vanessa's
+		//Add the registered devices to notify
+		for (List<Object> row : deviceTokens) {        
+			for(Object token : row) {
+				c.addRegId((String) token);
+			}
+		}
+			
         c.createData("Test Title", "Test Message");
         c.createNotification("Title notification", "Notification message");
 
