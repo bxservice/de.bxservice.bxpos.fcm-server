@@ -43,10 +43,10 @@ public class POST2GCM {
 	/**	Logger							*/
 	protected static CLogger log = CLogger.getCLogger (POST2GCM.class);
 
-	public static int post(String apiKey, NotificationContent content){
+	public static int post(String apiKey, NotificationContent content) {
 
 		int responseCode = -1;
-		try{
+		try {
 			// 1. URL
 			URL url = new URL("https://fcm.googleapis.com/fcm/send");
 

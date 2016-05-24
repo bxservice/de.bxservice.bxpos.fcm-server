@@ -27,11 +27,13 @@ package de.bxservice.process;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+import de.bxservice.bxpos.server.BXPOSNotificationCode;
 import de.bxservice.bxpos.server.NotificationContent;
 import de.bxservice.bxpos.server.POST2GCM;
 
@@ -40,10 +42,21 @@ public class NotificationProcess extends SvrProcess {
 	private static final String API_KEY = "AIzaSyC2Vwvpq2cQl4_nsUO2xbHpmUIm2Uv2GiY";
 	private NotificationContent content;
 	private List<List<Object>> deviceTokens;
+	private String notificationType = "";
 
 	@Override
 	protected void prepare() {
-			
+		ProcessInfoParameter[] para = getParameter();
+		for (int i = 0; i < para.length; i++)
+		{
+			String name = para[i].getParameterName();
+			if (para[i].getParameter() == null)
+				;
+			else if (name.equals("BXS_NotificationType"))
+				notificationType = (String)para[i].getParameter();
+			else
+				log.log(Level.SEVERE, "Unknown Parameter: " + name);
+		}
 	}
 
 	@Override
@@ -60,7 +73,7 @@ public class NotificationProcess extends SvrProcess {
         //Bring the devices that are registered
         deviceTokens = DB.getSQLArrayObjectsEx(get_TrxName(), selectQuery.toString(), Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx()));
         
-        if(deviceTokens != null && deviceTokens.size() > 0) {
+        if (deviceTokens != null && deviceTokens.size() > 0) {
             content = createContent();
             int responseCode = POST2GCM.post(API_KEY, content);
             
@@ -90,13 +103,23 @@ public class NotificationProcess extends SvrProcess {
 
 		//Add the registered devices to notify
 		for (List<Object> row : deviceTokens) {        
-			for(Object token : row) {
+			for (Object token : row) {
 				c.addRegId((String) token);
 			}
 		}
-			
-        c.createData("Test Title", "Test Message");
-        c.createNotification(Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestDescription"), Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestMessage"));
+		
+		String requestType = "";
+		String actionCode = "";
+		if ("RE".equals(notificationType)) {
+			requestType = String.valueOf(BXPOSNotificationCode.RECOMMENDED_REQUEST_CODE);
+			actionCode = BXPOSNotificationCode.RECOMMENDED_UPDATE_ACTION;
+		} else if ("MA".equals(notificationType)) {
+			requestType = String.valueOf(BXPOSNotificationCode.MANDATORY_REQUEST_CODE);
+			actionCode = BXPOSNotificationCode.MANDATORY_UPDATE_ACTION;
+		}
+
+        c.createData("", "", requestType);
+        c.createNotification(Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestDescription"), Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestMessage"), actionCode);
 
         return c;
     }

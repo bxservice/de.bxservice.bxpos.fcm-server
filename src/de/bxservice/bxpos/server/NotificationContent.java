@@ -41,25 +41,33 @@ public class NotificationContent implements Serializable {
     private Map<String,String> notification;
 
     public void addRegId(String regId) {
-        if(registration_ids == null)
+        if (registration_ids == null)
             registration_ids = new LinkedList<String>();
         registration_ids.add(regId);
     }
 
-    public void createData(String title, String message) {
-        if(data == null)
+    public void createData(String title, String message, String requestCode) {
+        if (data == null)
             data = new HashMap<String,String>();
 
-        data.put("title", title);
-        data.put("message", message);
-        data.put(BXPOSNotificationCode.REQUEST_TYPE, String.valueOf(BXPOSNotificationCode.SUGGESTED_REQUEST_CODE));
+        if (title != null && !title.isEmpty())
+        	data.put("title", title);
+        if (message != null && !message.isEmpty())
+        	data.put("message", message);
+        if (requestCode != null && !requestCode.isEmpty())
+        	data.put(BXPOSNotificationCode.REQUEST_TYPE, requestCode);
+
     }
     
-    public void createNotification(String body, String title) {
-        if(notification == null)
+    public void createNotification(String body, String title, String actionCode) {
+        if (notification == null)
         	notification = new HashMap<String,String>();
-
-        notification.put("body", body);
-        notification.put("title", title);
+        
+        if (actionCode != null && !actionCode.isEmpty())
+        	notification.put("click_action", actionCode);
+        if (body != null && !body.isEmpty())
+        	notification.put("body", body);
+        if (title != null && !title.isEmpty())
+        	notification.put("title", title);
     }   
 }
