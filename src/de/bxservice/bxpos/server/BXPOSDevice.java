@@ -24,23 +24,28 @@
  **********************************************************************/
 package de.bxservice.bxpos.server;
 
-public interface BXPOSNotificationCode {
+import java.util.List;
 
-	/**Type of update request*/
-	String REQUEST_TYPE = "RT";
+import org.compiere.util.DB;
+import org.compiere.util.Env;
+
+public class BXPOSDevice {
 	
-	/**update request that is not mandatory*/
-	int RECOMMENDED_REQUEST_CODE = 100;
+	private static List<List<Object>> deviceTokens;
 
-	/**Update request that is mandatory*/
-	int MANDATORY_REQUEST_CODE = 200;
+	public static List<List<Object>> getDeviceTokens(boolean reQuery, String trxName) {
+		if(deviceTokens == null || reQuery)
+			readDeviceTokens(trxName);
+		return deviceTokens;
+	}
 	
-	/**Table status changed request*/
-	int TABLE_STATUS_CHANGED_CODE = 300;
-
-    /**Request actions send as click_action to perform on click in the notification*/
-    /**Mandatory request action*/
-    String MANDATORY_UPDATE_ACTION   = "LOAD_DATA";
-    String RECOMMENDED_UPDATE_ACTION = "OPEN_ACTIVITY";
+	private static void readDeviceTokens(String trxName) {
+		StringBuilder selectQuery = new StringBuilder("Select bxs_devicetoken FROM BXS_DeviceRegistration")
+		.append(" WHERE ")
+		.append("IsActive='Y' AND AD_Client_ID=? AND AD_Org_ID=?");
+        
+        //Bring the devices that are registered
+        deviceTokens = DB.getSQLArrayObjectsEx(trxName, selectQuery.toString(), Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx()));
+	}
 
 }

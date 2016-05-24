@@ -22,25 +22,35 @@
  * Contributors:                                                       *
  * - Diego Ruiz - Bx Service GmbH                                      *
  **********************************************************************/
-package de.bxservice.bxpos.server;
+package de.bxservice.model;
 
-public interface BXPOSNotificationCode {
+import java.sql.ResultSet;
 
-	/**Type of update request*/
-	String REQUEST_TYPE = "RT";
-	
-	/**update request that is not mandatory*/
-	int RECOMMENDED_REQUEST_CODE = 100;
+import org.adempiere.base.IModelFactory;
+import org.compiere.model.PO;
+import org.compiere.util.Env;
 
-	/**Update request that is mandatory*/
-	int MANDATORY_REQUEST_CODE = 200;
-	
-	/**Table status changed request*/
-	int TABLE_STATUS_CHANGED_CODE = 300;
+public class BXPOSModelFactory implements IModelFactory {
 
-    /**Request actions send as click_action to perform on click in the notification*/
-    /**Mandatory request action*/
-    String MANDATORY_UPDATE_ACTION   = "LOAD_DATA";
-    String RECOMMENDED_UPDATE_ACTION = "OPEN_ACTIVITY";
+	@Override
+	public Class<?> getClass(String tableName) {
+		if (X_BAY_Table.Table_Name.equals(tableName))
+			return X_BAY_Table.class;
+		return null;
+	}
+
+	@Override
+	public PO getPO(String tableName, int Record_ID, String trxName) {
+		if (X_BAY_Table.Table_Name.equals(tableName))
+			return new X_BAY_Table(Env.getCtx(), Record_ID, trxName);
+		return null;
+	}
+
+	@Override
+	public PO getPO(String tableName, ResultSet rs, String trxName) {
+		if (X_BAY_Table.Table_Name.equals(tableName))
+			return new X_BAY_Table(Env.getCtx(), rs, trxName);
+		return null;
+	}
 
 }
