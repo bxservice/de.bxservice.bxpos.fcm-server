@@ -45,19 +45,27 @@ public class NotificationContent implements Serializable {
             registration_ids = new LinkedList<String>();
         registration_ids.add(regId);
     }
-
-    public void createData(String title, String message, String requestCode) {
+    
+    /**
+     * Gets a set of Strings to parse as data to send via push notifications
+     * the data must be an even number -> otherwise the notification will be empty
+     * @param dataSet
+     */
+    public void createData(String... dataSet) {
         if (data == null)
             data = new HashMap<String,String>();
-
-        if (title != null && !title.isEmpty())
-        	data.put("title", title);
-        if (message != null && !message.isEmpty())
-        	data.put("message", message);
-        if (requestCode != null && !requestCode.isEmpty())
-        	data.put(BXPOSNotificationCode.REQUEST_TYPE, requestCode);
-
+        
+        if(dataSet.length % 2 != 0) {
+        	return;
+        }
+        
+        int i = 0;
+        
+        while(i < dataSet.length) {
+        	data.put(dataSet[i++], dataSet[i++]);
+        }
     }
+
     
     public void createNotification(String body, String title, String actionCode) {
         if (notification == null)
@@ -69,5 +77,17 @@ public class NotificationContent implements Serializable {
         	notification.put("body", body);
         if (title != null && !title.isEmpty())
         	notification.put("title", title);
-    }   
+    }
+    
+    public void registerDevices(List<List<Object>> deviceTokens) {
+    	
+    	if(deviceTokens == null)
+    		return;
+    	
+    	for (List<Object> row : deviceTokens) {
+			for (Object token : row) {
+				addRegId((String) token);
+			}
+		}
+    }
 }

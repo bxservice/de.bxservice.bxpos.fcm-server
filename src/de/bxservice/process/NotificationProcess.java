@@ -29,10 +29,10 @@ import java.util.logging.Level;
 
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
-import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 
+import de.bxservice.bxpos.server.BXPOSDevice;
 import de.bxservice.bxpos.server.BXPOSNotificationCode;
 import de.bxservice.bxpos.server.NotificationContent;
 import de.bxservice.bxpos.server.POST2GCM;
@@ -65,13 +65,8 @@ public class NotificationProcess extends SvrProcess {
 		String message = null;
 		
 		log.log(Level.INFO, "Sending POST to GCM");
-        
-        StringBuilder selectQuery = new StringBuilder("Select bxs_devicetoken FROM BXS_DeviceRegistration")
-		.append(" WHERE ")
-		.append("IsActive='Y' AND AD_Client_ID=? AND AD_Org_ID=?");
-        
-        //Bring the devices that are registered
-        deviceTokens = DB.getSQLArrayObjectsEx(get_TrxName(), selectQuery.toString(), Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx()));
+		
+		deviceTokens = BXPOSDevice.getDeviceTokens(true, get_TrxName());
         
         if (deviceTokens != null && deviceTokens.size() > 0) {
             content = createContent();
@@ -102,11 +97,7 @@ public class NotificationProcess extends SvrProcess {
 		NotificationContent c = new NotificationContent();
 
 		//Add the registered devices to notify
-		for (List<Object> row : deviceTokens) {        
-			for (Object token : row) {
-				c.addRegId((String) token);
-			}
-		}
+		c.registerDevices(deviceTokens);
 		
 		String requestType = "";
 		String actionCode = "";
@@ -118,7 +109,7 @@ public class NotificationProcess extends SvrProcess {
 			actionCode = BXPOSNotificationCode.MANDATORY_UPDATE_ACTION;
 		}
 
-        c.createData("", "", requestType);
+        c.createData(BXPOSNotificationCode.REQUEST_TYPE, requestType);
         c.createNotification(Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestDescription"), Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestMessage"), actionCode);
 
         return c;
