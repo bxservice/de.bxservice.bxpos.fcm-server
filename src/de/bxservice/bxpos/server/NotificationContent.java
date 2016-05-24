@@ -52,7 +52,7 @@ public class NotificationContent implements Serializable {
 
         data.put("title", title);
         data.put("message", message);
-        data.put("message2", message);
+        data.put(BXPOSNotificationCode.REQUEST_TYPE, String.valueOf(BXPOSNotificationCode.SUGGESTED_REQUEST_CODE));
     }
     
     public void createNotification(String body, String title) {

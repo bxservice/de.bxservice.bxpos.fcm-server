@@ -25,10 +25,12 @@
 package de.bxservice.process;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.Msg;
 
 import de.bxservice.bxpos.server.NotificationContent;
 import de.bxservice.bxpos.server.POST2GCM;
@@ -49,7 +51,7 @@ public class NotificationProcess extends SvrProcess {
 		
 		String message = null;
 		
-		System.out.println( "Sending POST to GCM" );
+		log.log(Level.INFO, "Sending POST to GCM");
         
         StringBuilder selectQuery = new StringBuilder("Select bxs_devicetoken FROM BXS_DeviceRegistration")
 		.append(" WHERE ")
@@ -60,10 +62,16 @@ public class NotificationProcess extends SvrProcess {
         
         if(deviceTokens != null && deviceTokens.size() > 0) {
             content = createContent();
-            POST2GCM.post(API_KEY, content);
+            int responseCode = POST2GCM.post(API_KEY, content);
+            
+            //HTTP Code : OK 200. The request was fulfilled.
+            if (responseCode == 200)
+            	message = Msg.getMsg(Env.getCtx(), "BXS_NotificationSent");
+            else
+            	message = Msg.getMsg(Env.getCtx(), "BXS_NotificationFailed");
         }
         else {
-        	message = "No devices found";
+        	message = Msg.getMsg(Env.getCtx(), "BXS_NoDeviceFound");
         }
 		
         return message;
@@ -88,7 +96,7 @@ public class NotificationProcess extends SvrProcess {
 		}
 			
         c.createData("Test Title", "Test Message");
-        c.createNotification("Title notification", "Notification message");
+        c.createNotification(Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestDescription"), Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestMessage"));
 
         return c;
     }
