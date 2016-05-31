@@ -105,9 +105,9 @@ public class BXPOSTableStatusEventHandler extends AbstractEventHandler {
 		//Add the registered devices to notify
 		c.registerDevices(deviceTokens);		
         c.createData(BXPOSNotificationCode.REQUEST_TYPE, String.valueOf(BXPOSNotificationCode.TABLE_STATUS_CHANGED_CODE), 
-        		"TableId", tableId,
-        		"TableStatus", tableStatus,
-        		"ServerName", userName);
+        		BXPOSNotificationCode.CHANGED_TABLE_ID, tableId,
+        		BXPOSNotificationCode.NEW_TABLE_STATUS, tableStatus,
+        		BXPOSNotificationCode.SERVER_NAME, userName);
 
         return c;
     }
