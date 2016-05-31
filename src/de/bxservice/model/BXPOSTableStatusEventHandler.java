@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.adempiere.base.event.AbstractEventHandler;
 import org.adempiere.base.event.IEventTopics;
+import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
 import org.compiere.util.Env;
@@ -91,16 +92,22 @@ public class BXPOSTableStatusEventHandler extends AbstractEventHandler {
 
 		String tableId = "";
 		String tableStatus = "";
+		String userName = "";
 		
 		if (po != null) {
 			tableId = String.valueOf(((X_BAY_Table) po).getBAY_Table_ID());
 			tableStatus = ((X_BAY_Table) po).isBXS_IsBusy() ? "Y" : "N"; //SQLite boolean are integers
+			
+			MUser user = MUser.get(Env.getCtx(), ((X_BAY_Table) po).getUpdatedBy());
+			if (user != null) 
+				userName = user.getName();
 		}
 		//Add the registered devices to notify
 		c.registerDevices(deviceTokens);		
         c.createData(BXPOSNotificationCode.REQUEST_TYPE, String.valueOf(BXPOSNotificationCode.TABLE_STATUS_CHANGED_CODE), 
         		"TableId", tableId,
-        		"TableStatus", tableStatus);
+        		"TableStatus", tableStatus,
+        		"ServerName", userName);
 
         return c;
     }
