@@ -24,9 +24,11 @@
 **********************************************************************/
 package de.bxservice.process;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
@@ -34,12 +36,12 @@ import org.compiere.util.Msg;
 
 import de.bxservice.bxpos.server.BXPOSDevice;
 import de.bxservice.bxpos.server.BXPOSNotificationCode;
+import de.bxservice.bxpos.server.BXPOSPropertyValues;
 import de.bxservice.bxpos.server.NotificationContent;
 import de.bxservice.bxpos.server.POST2GCM;
 
 public class NotificationProcess extends SvrProcess {
 	
-	private static final String API_KEY = "AIzaSyC2Vwvpq2cQl4_nsUO2xbHpmUIm2Uv2GiY";
 	private NotificationContent content;
 	private List<List<Object>> deviceTokens;
 	private String notificationType = "";
@@ -63,24 +65,32 @@ public class NotificationProcess extends SvrProcess {
 	protected String doIt() throws Exception {
 		
 		String message = null;
-		
+		String apiKey = null;
 		log.log(Level.INFO, "Sending POST to GCM");
 		
-		deviceTokens = BXPOSDevice.getDeviceTokens(true, get_TrxName());
-        
-        if (deviceTokens != null && deviceTokens.size() > 0) {
-            content = createContent();
-            int responseCode = POST2GCM.post(API_KEY, content);
-            
-            //HTTP Code : OK 200. The request was fulfilled.
-            if (responseCode == 200)
-            	message = Msg.getMsg(Env.getCtx(), "BXS_NotificationSent");
-            else
-            	message = Msg.getMsg(Env.getCtx(), "BXS_NotificationFailed");
-        }
-        else {
-        	message = Msg.getMsg(Env.getCtx(), "BXS_NoDeviceFound");
-        }
+		BXPOSPropertyValues properties = new BXPOSPropertyValues();
+		try {
+			apiKey = properties.getApiKey();
+		} catch (IOException e) {
+			throw new AdempiereException("No property file condigured");
+		}
+		
+		if (apiKey != null) {
+			deviceTokens = BXPOSDevice.getDeviceTokens(true, get_TrxName());
+	        if (deviceTokens != null && deviceTokens.size() > 0) {
+	            content = createContent();
+	            int responseCode = POST2GCM.post(apiKey, content);
+	            
+	            //HTTP Code : OK 200. The request was fulfilled.
+	            if (responseCode == 200)
+	            	message = Msg.getMsg(Env.getCtx(), "BXS_NotificationSent");
+	            else
+	            	message = Msg.getMsg(Env.getCtx(), "BXS_NotificationFailed");
+	        }
+	        else {
+	        	message = Msg.getMsg(Env.getCtx(), "BXS_NoDeviceFound");
+	        }			
+		}
 		
         return message;
 	}

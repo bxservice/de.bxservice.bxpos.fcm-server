@@ -24,10 +24,12 @@
  **********************************************************************/
 package de.bxservice.model;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.adempiere.base.event.AbstractEventHandler;
 import org.adempiere.base.event.IEventTopics;
+import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
@@ -37,12 +39,12 @@ import org.osgi.service.event.Event;
 
 import de.bxservice.bxpos.server.BXPOSDevice;
 import de.bxservice.bxpos.server.BXPOSNotificationCode;
+import de.bxservice.bxpos.server.BXPOSPropertyValues;
 import de.bxservice.bxpos.server.NotificationContent;
 import de.bxservice.bxpos.server.POST2GCM;
 
 public class BXPOSTableStatusEventHandler extends AbstractEventHandler {
 
-	private static final String API_KEY = "AIzaSyC2Vwvpq2cQl4_nsUO2xbHpmUIm2Uv2GiY";
 	/**	Logger			*/
 	private static CLogger log = CLogger.getCLogger(BXPOSTableStatusEventHandler.class);
 	private NotificationContent content;
@@ -58,17 +60,27 @@ public class BXPOSTableStatusEventHandler extends AbstractEventHandler {
 		// When the table status is modified in the app
 		if (type.equals(IEventTopics.PO_AFTER_CHANGE) &&
 				po.is_ValueChanged(X_BAY_Table.COLUMNNAME_BXS_IsBusy)) {
-
-			deviceTokens = BXPOSDevice.getDeviceTokens(true, po.get_TrxName());
 			
-			if (deviceTokens != null && deviceTokens.size() > 0) {
-	            content = createContent();
-	            POST2GCM.post(API_KEY, content);
-	        }
-	        else {
-	    		log.info(Msg.getMsg(Env.getCtx(), "BXS_NoDeviceFound"));
-	        }
+			BXPOSPropertyValues properties = new BXPOSPropertyValues();
+			String apiKey = null;
+			try {
+				apiKey = properties.getApiKey();
+			} catch (IOException e) {
+				throw new AdempiereException("No property file condigured");
+			}
 			
+			if (apiKey != null) {
+				deviceTokens = BXPOSDevice.getDeviceTokens(true, po.get_TrxName());
+				
+				if (deviceTokens != null && deviceTokens.size() > 0) {
+		            content = createContent();
+		            POST2GCM.post(apiKey, content);
+		        }
+		        else {
+		    		log.info(Msg.getMsg(Env.getCtx(), "BXS_NoDeviceFound"));
+		        }
+				
+			}			
 		}
 	}
 
