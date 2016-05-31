@@ -101,16 +101,21 @@ public class NotificationProcess extends SvrProcess {
 		
 		String requestType = "";
 		String actionCode = "";
+		String notificationMessage = "";
+		String notificationDescription = "";
 		if ("RE".equals(notificationType)) {
 			requestType = String.valueOf(BXPOSNotificationCode.RECOMMENDED_REQUEST_CODE);
 			actionCode = BXPOSNotificationCode.RECOMMENDED_UPDATE_ACTION;
+			notificationMessage = Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestMessage");
+			notificationDescription = Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestDescription");
 		} else if ("MA".equals(notificationType)) {
 			requestType = String.valueOf(BXPOSNotificationCode.MANDATORY_REQUEST_CODE);
 			actionCode = BXPOSNotificationCode.MANDATORY_UPDATE_ACTION;
+			notificationMessage = Msg.getMsg(Env.getCtx(), "BXS_MandatoryUpdateRequestMessage");
 		}
 
         c.createData(BXPOSNotificationCode.REQUEST_TYPE, requestType);
-        c.createNotification(Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestDescription"), Msg.getMsg(Env.getCtx(), "BXS_UpdateRequestMessage"), actionCode);
+        c.createNotification(notificationDescription, notificationMessage, actionCode);
 
         return c;
     }
