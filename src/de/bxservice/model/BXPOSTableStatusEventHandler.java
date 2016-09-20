@@ -70,7 +70,7 @@ public class BXPOSTableStatusEventHandler extends AbstractEventHandler {
 			}
 			
 			if (apiKey != null) {
-				deviceTokens = BXPOSDevice.getDeviceTokens(true, po.get_TrxName());
+				deviceTokens = BXPOSDevice.getDeviceTokens(true, po.get_TrxName(), Env.getAD_Org_ID(Env.getCtx()));
 				
 				if (deviceTokens != null && deviceTokens.size() > 0) {
 		            content = createContent();

@@ -33,19 +33,19 @@ public class BXPOSDevice {
 	
 	private static List<List<Object>> deviceTokens;
 
-	public static List<List<Object>> getDeviceTokens(boolean reQuery, String trxName) {
+	public static List<List<Object>> getDeviceTokens(boolean reQuery, String trxName, int AD_Org_ID) {
 		if(deviceTokens == null || reQuery)
-			readDeviceTokens(trxName);
+			readDeviceTokens(trxName, AD_Org_ID);
 		return deviceTokens;
 	}
 	
-	private static void readDeviceTokens(String trxName) {
+	private static void readDeviceTokens(String trxName, int AD_Org_ID) {
 		StringBuilder selectQuery = new StringBuilder("Select bxs_devicetoken FROM BXS_DeviceRegistration")
 		.append(" WHERE ")
 		.append("IsActive='Y' AND AD_Client_ID=? AND AD_Org_ID=?");
         
         //Bring the devices that are registered
-        deviceTokens = DB.getSQLArrayObjectsEx(trxName, selectQuery.toString(), Env.getAD_Client_ID(Env.getCtx()), Env.getAD_Org_ID(Env.getCtx()));
+        deviceTokens = DB.getSQLArrayObjectsEx(trxName, selectQuery.toString(), Env.getAD_Client_ID(Env.getCtx()), AD_Org_ID);
 	}
 
 }

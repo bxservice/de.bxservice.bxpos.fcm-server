@@ -25,6 +25,7 @@
 package de.bxservice.process;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -45,6 +46,7 @@ public class NotificationProcess extends SvrProcess {
 	private NotificationContent content;
 	private List<List<Object>> deviceTokens;
 	private String notificationType = "";
+	private int	p_AD_Org_ID = -1;
 
 	@Override
 	protected void prepare() {
@@ -56,6 +58,8 @@ public class NotificationProcess extends SvrProcess {
 				;
 			else if (name.equals("BXS_NotificationType"))
 				notificationType = (String)para[i].getParameter();
+			else if (name.equals("AD_Org_ID"))
+				p_AD_Org_ID = ((BigDecimal)para[i].getParameter()).intValue();
 			else
 				log.log(Level.SEVERE, "Unknown Parameter: " + name);
 		}
@@ -76,7 +80,7 @@ public class NotificationProcess extends SvrProcess {
 		}
 		
 		if (apiKey != null) {
-			deviceTokens = BXPOSDevice.getDeviceTokens(true, get_TrxName());
+			deviceTokens = BXPOSDevice.getDeviceTokens(true, get_TrxName(), p_AD_Org_ID);
 	        if (deviceTokens != null && deviceTokens.size() > 0) {
 	            content = createContent();
 	            int responseCode = POST2GCM.post(apiKey, content);
