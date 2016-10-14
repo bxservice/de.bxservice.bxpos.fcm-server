@@ -24,12 +24,11 @@
  **********************************************************************/
 package de.bxservice.model;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.adempiere.base.event.AbstractEventHandler;
 import org.adempiere.base.event.IEventTopics;
-import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MSysConfig;
 import org.compiere.model.MUser;
 import org.compiere.model.PO;
 import org.compiere.util.CLogger;
@@ -39,7 +38,6 @@ import org.osgi.service.event.Event;
 
 import de.bxservice.bxpos.server.BXPOSDevice;
 import de.bxservice.bxpos.server.BXPOSNotificationCode;
-import de.bxservice.bxpos.server.BXPOSPropertyValues;
 import de.bxservice.bxpos.server.NotificationContent;
 import de.bxservice.bxpos.server.POST2GCM;
 
@@ -61,15 +59,9 @@ public class BXPOSTableStatusEventHandler extends AbstractEventHandler {
 		if (type.equals(IEventTopics.PO_AFTER_CHANGE) &&
 				po.is_ValueChanged(X_BAY_Table.COLUMNNAME_BXS_IsBusy)) {
 			
-			BXPOSPropertyValues properties = new BXPOSPropertyValues();
-			String apiKey = null;
-			try {
-				apiKey = properties.getApiKey();
-			} catch (IOException e) {
-				throw new AdempiereException("No property file condigured");
-			}
+			String apiKey = MSysConfig.getValue("BXS_POS_APIKEY", "");
 			
-			if (apiKey != null) {
+			if (apiKey != null && !apiKey.isEmpty()) {
 				deviceTokens = BXPOSDevice.getDeviceTokens(true, po.get_TrxName(), Env.getAD_Org_ID(Env.getCtx()));
 				
 				if (deviceTokens != null && deviceTokens.size() > 0) {

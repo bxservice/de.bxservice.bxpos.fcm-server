@@ -24,12 +24,11 @@
 **********************************************************************/
 package de.bxservice.process;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MSysConfig;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.Env;
@@ -37,7 +36,6 @@ import org.compiere.util.Msg;
 
 import de.bxservice.bxpos.server.BXPOSDevice;
 import de.bxservice.bxpos.server.BXPOSNotificationCode;
-import de.bxservice.bxpos.server.BXPOSPropertyValues;
 import de.bxservice.bxpos.server.NotificationContent;
 import de.bxservice.bxpos.server.POST2GCM;
 
@@ -69,17 +67,11 @@ public class NotificationProcess extends SvrProcess {
 	protected String doIt() throws Exception {
 		
 		String message = null;
-		String apiKey = null;
 		log.log(Level.INFO, "Sending POST to GCM");
+
+		String apiKey = MSysConfig.getValue("BXS_POS_APIKEY", "");
 		
-		BXPOSPropertyValues properties = new BXPOSPropertyValues();
-		try {
-			apiKey = properties.getApiKey();
-		} catch (IOException e) {
-			throw new AdempiereException("No property file condigured");
-		}
-		
-		if (apiKey != null) {
+		if (apiKey != null && !apiKey.isEmpty()) {
 			deviceTokens = BXPOSDevice.getDeviceTokens(true, get_TrxName(), p_AD_Org_ID);
 	        if (deviceTokens != null && deviceTokens.size() > 0) {
 	            content = createContent();
@@ -90,10 +82,11 @@ public class NotificationProcess extends SvrProcess {
 	            	message = Msg.getMsg(Env.getCtx(), "BXS_NotificationSent");
 	            else
 	            	message = Msg.getMsg(Env.getCtx(), "BXS_NotificationFailed");
-	        }
-	        else {
+	        } else {
 	        	message = Msg.getMsg(Env.getCtx(), "BXS_NoDeviceFound");
 	        }			
+		} else {
+        	message = "No Api Key found, push notifications functions are unavailable";
 		}
 		
         return message;
