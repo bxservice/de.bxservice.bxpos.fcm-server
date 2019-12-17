@@ -3,7 +3,7 @@ FCM Notification Plugin
 
 Description
 -----------
-This plugin is a server-side plugin required to use the [Freibier POS](https://bitbucket.org/tbayen_bxservice/de.bxservice.freibierpos/overview) app, the plugin takes care of the following:
+This plugin is a server-side plugin required to use the [Freibier POS](https://github.com/bxservice/de.bxservice.freibierpos) app, the plugin takes care of the following:
 
 * Create the necessary tables and views in iDempiere to support the Android POS.
 * Support the functionality to send push notifications from the server to the subscribed devices.
@@ -18,7 +18,7 @@ Features
 
 Documentation
 -------------
-- You can find all the documentation [here](https://bitbucket.org/tbayen_bxservice/bx-freibier-pos-documentation).
+- You can find all the documentation [here](https://github.com/bxservice/bx-freibier-pos-documentation).
 
 Questions or feedback
 -------------
