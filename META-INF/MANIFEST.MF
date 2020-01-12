@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Gcm-server
 Bundle-SymbolicName: de.bxservice.bxpos.fcm-server;singleton:=true
-Bundle-Version: 4.1.6.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.adempiere.base;bundle-version="4.1.0",
- org.adempiere.plugin.utils;bundle-version="4.1.0"
+Bundle-Version: 7.1.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=11))"
+Require-Bundle: org.adempiere.base;bundle-version="7.1.0",
+ org.adempiere.plugin.utils;bundle-version="7.1.0"
 Bundle-Activator: org.adempiere.plugin.utils.Incremental2PackActivator
 Service-Component: OSGI-INF/*.xml
 Import-Package: com.fasterxml.jackson.core,
@@ -21,3 +22,4 @@ Import-Package: com.fasterxml.jackson.core,
 Bundle-ClassPath: libs/jackson-all-1.9.0.jar,
  .
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: de.bxservice.bxpos.fcm-server

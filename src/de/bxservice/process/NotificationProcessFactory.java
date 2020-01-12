@@ -34,7 +34,7 @@ public class NotificationProcessFactory implements IProcessFactory {
 		ProcessCall process = null;
 		if ("de.bxservice.process.NotificationProcess".equals(className)) {
 			try {
-				process =  NotificationProcess.class.newInstance();
+				process =  NotificationProcess.class.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {}
 		}
 
